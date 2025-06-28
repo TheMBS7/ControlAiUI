@@ -1,6 +1,6 @@
 import { Nunito } from "next/font/google";
-import { Audiowide } from 'next/font/google'
 import "./globals.css";
+import { AosInit } from "./_components/aos-init";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -21,6 +21,7 @@ export default function RootLayout({
         className={`antialiased`}
       >
         {children}
+        <AosInit />
       </body>
     </html>
   );
