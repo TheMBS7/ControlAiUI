@@ -1,4 +1,6 @@
 import { Audiowide } from 'next/font/google'
+import Link from "next/link"
+
 const audiowide = Audiowide({
   subsets: ['latin'],
   weight: '400',
@@ -12,7 +14,7 @@ export default function Home() {
   return (
     
 
-    <section>
+    <section >
       <div className="text-center">
         <div>
           <h1 className={titulo}>ControlAí<span data-aos="zoom-in" className="absolute bottom-0 left-1 w-full h-2 bg-gradient-to-r from-[#00d4ff] via-[#12698A] to-[#00d4ff] rounded-full"></span></h1>
@@ -23,7 +25,7 @@ export default function Home() {
         </div>
 
         <div className="mt-15 flex justify-center">
-          <h1 className={botaoClasse}>Extratos</h1>
+          <Link href="extratos" className={botaoClasse}>Extratos</Link>
         </div>
 
         <div className="mt-15 flex justify-center">
