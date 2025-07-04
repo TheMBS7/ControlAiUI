@@ -29,7 +29,7 @@ export default function Home() {
         </div>
 
         <div className="mt-15 flex justify-center">
-          <h1 className={botaoClasse}>Projeção Anual</h1>
+          <Link href="configuracao" className={botaoClasse}>Configuração</Link>
         </div>
         
       </div>

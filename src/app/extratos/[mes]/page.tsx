@@ -1,7 +1,7 @@
 import React, { } from 'react';
 
 async function fetchExtratos() {
-  const res = await fetch('http://localhost:5189/api/Extratos/Exibir-Extratos', {
+  const res = await fetch('http://localhost:5189/api/Extratos/Display-Extratos', {
     cache: 'no-store' // para sempre buscar dados atualizados
   });
   if (!res.ok) {
