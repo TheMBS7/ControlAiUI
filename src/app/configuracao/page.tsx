@@ -1,21 +1,63 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Pencil, Trash } from 'lucide-react'
+'use client'
 
-async function fetchCategorias() {
-  const res = await fetch('http://localhost:5189/api/Categorias/Display-Categorias', {
-    cache: 'no-store' // para sempre buscar dados atualizados
-  });
-  if (!res.ok) {
-    throw new Error('Falha ao carregar os extratos');
+import { useEffect, useState } from "react"
+import { criarCategoria, deleteCategoria, editarCategoria, fetchCategorias } from "@/app/services/categoriaService"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Pencil, Trash, Check } from 'lucide-react'
+
+export default function Configuracao() {
+    const [categorias, setCategorias] = useState<any[]>([])
+    const [novaCategoria, setNovaCategoria] = useState("")
+    const [editandoId, setEditandoId] = useState<number | null>(null); //guarda o ID da categoria que está sendo editada
+    const [nomeEditado, setNomeEditado] = useState("");
+
+  useEffect(() => {
+    carregarCategorias();
+  }, []);
+
+  const carregarCategorias = async () => {
+    try {
+      const data = await fetchCategorias();
+      setCategorias(data);
+    } catch (error) {
+      console.error(error);
+    }
   }
-  return res.json();
-}
 
-export default async function Configuracao(){
+  const handleCriar = async () => {
+    if (!novaCategoria.trim()) return;
 
-    const categorias = await fetchCategorias();
+    try {
+      await criarCategoria(novaCategoria);
+      setNovaCategoria("");
+      carregarCategorias();
+    } catch (erro) {
+      console.error(erro);
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try{
+        await deleteCategoria(id);
+        carregarCategorias();
+    } catch (erro) {
+      console.error(erro);
+    }
+  }
+
+  const handleEditar = async (id: number) => {
+  try {
+    await editarCategoria(id, nomeEditado); // 👈 Essa função você cria para chamar a API
+    setEditandoId(null);
+    setNomeEditado("");
+    carregarCategorias();
+  } catch (erro) {
+    console.error(erro);
+  }
+};
+
 
     return(
         <div className=" w-[50%] min-h-96 bg-amber-50">
@@ -26,21 +68,56 @@ export default async function Configuracao(){
                         {categorias.map((categoria: any) => (
                         <li key={categoria.id}>
                             <div className="flex">
-                                <Button variant="ghost">
+                                <Button 
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setEditandoId(categoria.id);
+                                        setNomeEditado(categoria.nome)
+                                    }}
+                                >
                                     <Pencil size={18} className="text-blue-500" />
                                 </Button>
-                                <Button variant="ghost">
+                                <Button 
+                                    variant="ghost"
+                                    onClick={() => handleDelete(categoria.id)}
+                                >
                                     <Trash size={18} className="text-red-500" />
                                 </Button>
+                                {editandoId === categoria.id ? (
+                                <>
+                                    <Input
+                                    value={nomeEditado}
+                                    onChange={(e) => setNomeEditado(e.target.value)}
+                                    className="max-w-xs"
+                                    />
+                                    <Button
+                                    variant="ghost"
+                                    onClick={() => handleEditar(categoria.id)}
+                                    >
+                                    <Check size={18} className="text-green-600" />
+                                    </Button>
+                                </>
+                                ) : (
                                 <p className="p-1 mt-1">{categoria.nome}</p>
+                                )}
                             </div>
                         </li>
                         ))}
                     </ul>
                 </CardContent>
                 <CardFooter className="gap-2">
-                    <Input placeholder="Digite sua Categoria" className=""/>
-                    <Button variant="secondary" className="bg-[#12698A]">Enviar</Button>
+                <Input
+                    placeholder="Digite sua Categoria"
+                    value={novaCategoria}
+                    onChange={(e) => setNovaCategoria(e.target.value)}
+                />
+                <Button
+                    variant="secondary"
+                    className="bg-[#12698A]"
+                    onClick={() => handleCriar()}
+                >
+                    Enviar
+                </Button>
                 </CardFooter>
             </Card>
         </div>
