@@ -39,17 +39,17 @@ export async function deletarPessoa(id: number) {
   return await res.json();
 }
 
-export async function editarPessoa(id: number, name: string) {
+export async function editarPessoa(id: number, nome: string) {
   const res = await fetch(`${BASE_URL}/Edit/${id}`, {
     method: 'PUT',
     headers: {
     'Content-Type': 'application/json'
     },
-    body: JSON.stringify({name})
+    body: JSON.stringify({nome})
   });
 
   if (!res.ok) {
-    throw new Error('Erro ao deletar Pessoa');
+    throw new Error('Erro ao editar Pessoa');
   }
   return await res.json();
 }

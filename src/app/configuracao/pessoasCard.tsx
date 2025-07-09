@@ -10,6 +10,8 @@ import { Pencil, Trash, Check } from 'lucide-react'
 export default function PessoasCard() {
     const [pessoas, setPessoas] = useState<{ id: number; nome: string }[]>([])
     const [novaPessoa, setNovaPessoa] = useState("")
+    const [editandoId, setEditandoId] = useState<number | null>(null)
+    const [nomeEditado, setNomeEditado] = useState<string>("")
 
     useEffect(() => {
         carregarPessoas();
@@ -18,7 +20,7 @@ export default function PessoasCard() {
     async function carregarPessoas() {
         try{
             const data = await fetchPessoas();
-            setPessoas([...data]);
+            setPessoas(data);
         } catch(erro){
             console.error("Erro ao carregar pessoas:", erro);
         }
@@ -45,6 +47,17 @@ export default function PessoasCard() {
         }
     }
 
+    async function handleEditar(id: number, name: string){
+        try{
+            await editarPessoa(id, name);
+            setEditandoId(null);
+            setNomeEditado("");
+            await carregarPessoas();
+        } catch (erro){
+            console.error(erro);
+        }
+    }
+
     return (
         <div className="w-[95%] min-h-96 bg-amber-50">
             <Card className="w-[50%] min-h-96 p-4 mx-auto mt-30">
@@ -53,16 +66,41 @@ export default function PessoasCard() {
                     <ul>
                         {pessoas.map((pessoa)=> (
                             <li key={pessoa.id}>
-                                <Button variant="ghost">
-                                    <Pencil className="text-blue-500"/>
-                                </Button>
-                                <Button 
-                                variant="ghost"
-                                onClick={() => handleDelete(pessoa.id)}
-                                >
-                                    <Trash className="text-red-500"/>
-                                </Button>
-                                {pessoa.nome}
+                                <div className="flex">
+                                    <Button 
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setEditandoId(pessoa.id)
+                                        setNomeEditado(pessoa.nome)
+                                    }}
+                                    >
+                                        <Pencil className="text-blue-500"/>
+                                    </Button>
+                                    <Button 
+                                    variant="ghost"
+                                    onClick={() => handleDelete(pessoa.id)}
+                                    >
+                                        <Trash className="text-red-500"/>
+                                    </Button>
+                                    {pessoa.id === editandoId ? (
+                                        <>
+                                            <Input 
+                                            value={nomeEditado} 
+                                            onChange={(e) => setNomeEditado(e.target.value)} 
+                                            className="max-w-xs"
+                                            />
+                                            <Button
+                                            variant="ghost"
+                                            onClick={() => handleEditar(pessoa.id, nomeEditado)}
+                                            >
+                                                <Check className="text-green-600 size-[19px]"/>
+                                            </Button>
+                                        </>
+                                        
+                                        ) : (
+                                        <p className= "p-1 mt-1">{pessoa.nome}</p>
+                                        )}  
+                                </div>                              
                             </li>
                         ))}
                     </ul>
@@ -74,7 +112,7 @@ export default function PessoasCard() {
                 />
                 <Button
                     variant="secondary"
-                    className="bg-[#12698A]"
+                    className="bg-[#12698A] font-bold"
                     onClick={() => handleCriar()}
                 >
                     Enviar

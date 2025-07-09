@@ -52,7 +52,7 @@ export default function CategoriaCard() {
     await editarCategoria(id, nomeEditado);
     setEditandoId(null);
     setNomeEditado("");
-    carregarCategorias();
+    await carregarCategorias();
   } catch (erro) {
     console.error(erro);
   }
