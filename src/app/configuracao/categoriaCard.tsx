@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Pencil, Trash, Check } from 'lucide-react'
 
 export default function CategoriaCard() {
-    const [categorias, setCategorias] = useState<any[]>([])
+    const [categorias, setCategorias] = useState<{ id: number; nome: string }[]>([])
     const [novaCategoria, setNovaCategoria] = useState("")
     const [editandoId, setEditandoId] = useState<number | null>(null); //guarda o ID da categoria que está sendo editada
     const [nomeEditado, setNomeEditado] = useState("");
@@ -17,14 +17,14 @@ export default function CategoriaCard() {
     carregarCategorias();
   }, []);
 
-  const carregarCategorias = async () => {
-    try {
-      const data = await fetchCategorias();
-      setCategorias(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  async function carregarCategorias() {
+          try{
+              const data = await fetchCategorias();
+              setCategorias(data);
+          } catch(erro){
+              console.error("Erro ao carregar categorias:", erro);
+          }
+      } 
 
   const handleCriar = async () => {
     if (!novaCategoria.trim()) return;
@@ -65,7 +65,7 @@ export default function CategoriaCard() {
                 <CardTitle className="text-3xl justify-center flex">CATEGORIAS</CardTitle>
                 <CardContent>
                     <ul>
-                        {categorias.map((categoria: any) => (
+                        {categorias.map((categoria) => (
                         <li key={categoria.id}>
                             <div className="flex">
                                 <Button 
