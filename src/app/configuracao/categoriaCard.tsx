@@ -5,7 +5,7 @@ import { criarCategoria, deleteCategoria, editarCategoria, fetchCategorias } fro
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Pencil, Trash, Check } from 'lucide-react'
+import { Pencil, Trash, Check, ArrowRight } from 'lucide-react'
 
 export default function CategoriaCard() {
     const [categorias, setCategorias] = useState<{ id: number; nome: string }[]>([])
@@ -13,59 +13,66 @@ export default function CategoriaCard() {
     const [editandoId, setEditandoId] = useState<number | null>(null); //guarda o ID da categoria que está sendo editada
     const [nomeEditado, setNomeEditado] = useState("");
 
-  useEffect(() => {
-    carregarCategorias();
-  }, []);
+    const [pageAtual, setPageAtual] = useState(1);
+    const porPagina = 8
 
-  async function carregarCategorias() {
+    useEffect(() => {
+        carregarCategorias();
+    }, []);
+
+    async function carregarCategorias() {
           try{
               const data = await fetchCategorias();
               setCategorias(data);
           } catch(erro){
               console.error("Erro ao carregar categorias:", erro);
           }
-      } 
+    } 
 
-  const handleCriar = async () => {
-    if (!novaCategoria.trim()) return;
+    async function handleCriar(){
+        if (!novaCategoria.trim()) return;
 
-    try {
-      await criarCategoria(novaCategoria);
-      setNovaCategoria("");
-      carregarCategorias();
-    } catch (erro) {
-      console.error(erro);
+        try {
+            await criarCategoria(novaCategoria);
+            setNovaCategoria("");
+            await carregarCategorias();
+            } catch (erro) {
+            console.error(erro);
+            }
     }
-  }
 
-  const handleDelete = async (id: number) => {
-    try{
-        await deleteCategoria(id);
-        carregarCategorias();
-    } catch (erro) {
-      console.error(erro);
+    async function handleDelete(id: number){
+        try{
+            await deleteCategoria(id);
+            await carregarCategorias();
+        } catch (erro) {
+        console.error(erro);
+        }
     }
-  }
 
-  const handleEditar = async (id: number) => {
-  try {
-    await editarCategoria(id, nomeEditado);
-    setEditandoId(null);
-    setNomeEditado("");
-    await carregarCategorias();
-  } catch (erro) {
-    console.error(erro);
-  }
-};
+    async function handleEditar(id: number){
+        try {
+            await editarCategoria(id, nomeEditado);
+            setEditandoId(null);
+            setNomeEditado("");
+            await carregarCategorias();
+        } catch (erro) {
+            console.error(erro);
+        }
+    };
 
+    const totalPaginas = Math.ceil(categorias.length / porPagina)
+    const inicio = (pageAtual - 1) * porPagina;
+    const fim = (inicio + porPagina);
+    const categoriasPaginada = categorias.slice(inicio, fim);
 
     return(
-        <div className=" w-[95%] min-h-96 bg-amber-50">
-            <Card className=" w-[50%] min-h-96 p-4 mx-auto mt-30">
+        <div className=" w-[95%] min-h-96">
+            <Card className=" w-[50%] min-h-96 max-h-120 p-4 mx-auto mt-30">
                 <CardTitle className="text-3xl justify-center flex">CATEGORIAS</CardTitle>
                 <CardContent>
                     <ul>
-                        {categorias.map((categoria) => (
+                        {categoriasPaginada.map((categoria) => (
                         <li key={categoria.id}>
                             <div className="flex">
                                 <Button 
@@ -104,6 +111,23 @@ export default function CategoriaCard() {
                         </li>
                         ))}
                     </ul>
+                    <div className="flex justify-between mt-2">
+                        <Button
+                        variant="ghost"
+                        disabled= {pageAtual === 1}
+                        onClick={() => setPageAtual(pageAtual - 1)}>
+                            Anterior
+                        </Button>
+                        <p>Página {pageAtual} de {totalPaginas}</p>
+                        <Button
+                        variant="ghost"
+                        disabled={pageAtual === totalPaginas}
+                        onClick={() => setPageAtual(pageAtual + 1)}>
+                            Próxima
+                        </Button>
+                    </div>
+                    
+
                 </CardContent>
                 <CardFooter className="gap-2">
                 <Input
@@ -113,7 +137,7 @@ export default function CategoriaCard() {
                 />
                 <Button
                     variant="secondary"
-                    className="bg-[#12698A]"
+                    className="bg-[#12698A] font-bold"
                     onClick={() => handleCriar()}
                 >
                     Enviar

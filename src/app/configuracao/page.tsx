@@ -10,7 +10,7 @@ export default function Configuracao() {
       <div className=" absolute mt-8 left-1/2 -translate-x-1/2">
         <AlertDialog>
           <AlertDialogTrigger>
-            <Button variant="ghost" className="bg-gray-200 text-black font-bold rounded-full">?</Button>
+            <Button variant="ghost" className="bg-[#12698a] text-black font-bold rounded-full">?</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogTitle>
