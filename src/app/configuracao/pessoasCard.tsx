@@ -5,7 +5,7 @@ import { fetchPessoas, criarPessoa, deletarPessoa, editarPessoa } from "@/app/se
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Pencil, Trash, Check } from 'lucide-react'
+import { Pencil, Trash, Check, ChevronRight, ChevronLeft } from 'lucide-react'
 
 export default function PessoasCard() {
     const [pessoas, setPessoas] = useState<{ id: number; nome: string }[]>([])
@@ -13,7 +13,7 @@ export default function PessoasCard() {
     const [editandoId, setEditandoId] = useState<number | null>(null)
     const [nomeEditado, setNomeEditado] = useState<string>("")
 
-    const [paginaAtual, setPaginaAtual] = useState(1)
+    const [paginaAtual, setPaginaAtual] = useState(1);
     const porPagina = 8
 
     useEffect(() => {
@@ -65,16 +65,26 @@ export default function PessoasCard() {
     const fim = inicio + porPagina
     const pessoasPaginadas = pessoas.slice(inicio, fim)
 
+    useEffect(() => {
+        if(totalPaginas === 0){
+            setPaginaAtual(1);
+        }else if (paginaAtual > totalPaginas){
+            setPaginaAtual(totalPaginas);
+        }
+    },[pessoas.length, paginaAtual]);
+
     return (
         <div className="w-[95%] min-h-96">
-            <Card className="w-[50%] max-h-[510px] p-4 mx-auto mt-30 flex flex-col">
+            <Card className="w-[50%] min-h-96  p-4 mx-auto mt-30">
                 <CardTitle className="text-3xl justify-center flex">PESSOAS</CardTitle>
-                <CardContent className="overflow-auto ">
+                <CardContent>
                     <ul>
                         {pessoasPaginadas.map((pessoa) => (
                             <li key={pessoa.id}>
                                 <div className="flex">
-                                    <Button variant="ghost" onClick={() => {
+                                    <Button 
+                                    variant="ghost" 
+                                    onClick={() => {
                                         setEditandoId(pessoa.id)
                                         setNomeEditado(pessoa.nome)
                                     }}>
@@ -113,15 +123,17 @@ export default function PessoasCard() {
                         disabled={paginaAtual === 1}
                         onClick={() => setPaginaAtual(p => p - 1)}
                     >
-                        Anterior
-                    </Button>
-                    <p>Página {paginaAtual} de {totalPaginas}</p>
+                        <ChevronLeft className="size-[22px]"/>
+                    </Button> 
+                    <p className="mt-1.5">
+                        Página {paginaAtual} de {totalPaginas === 0 ? 1 : totalPaginas}
+                    </p>
                     <Button
                         variant="ghost"
-                        disabled={paginaAtual === totalPaginas}
+                        disabled={paginaAtual === totalPaginas || totalPaginas === 0}
                         onClick={() => setPaginaAtual(p => p + 1)}
                     >
-                        Próxima
+                        <ChevronRight className="size-[22px]"/>
                     </Button>
                 </div>
 

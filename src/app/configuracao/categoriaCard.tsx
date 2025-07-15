@@ -5,7 +5,7 @@ import { criarCategoria, deleteCategoria, editarCategoria, fetchCategorias } fro
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Pencil, Trash, Check, ArrowRight } from 'lucide-react'
+import { Pencil, Trash, Check, ChevronRight, ChevronLeft } from 'lucide-react'
 
 export default function CategoriaCard() {
     const [categorias, setCategorias] = useState<{ id: number; nome: string }[]>([])
@@ -21,12 +21,12 @@ export default function CategoriaCard() {
     }, []);
 
     async function carregarCategorias() {
-          try{
-              const data = await fetchCategorias();
-              setCategorias(data);
-          } catch(erro){
-              console.error("Erro ao carregar categorias:", erro);
-          }
+        try{
+            const data = await fetchCategorias();
+            setCategorias(data);
+        } catch(erro){
+            console.error("Erro ao carregar categorias:", erro);
+        }
     } 
 
     async function handleCriar(){
@@ -62,13 +62,22 @@ export default function CategoriaCard() {
     };
 
     const totalPaginas = Math.ceil(categorias.length / porPagina)
-    const inicio = (pageAtual - 1) * porPagina;
-    const fim = (inicio + porPagina);
-    const categoriasPaginada = categorias.slice(inicio, fim);
+    const inicio = (pageAtual - 1) * porPagina
+    const fim = inicio + porPagina
+    const categoriasPaginada = categorias.slice(inicio, fim)
+
+    useEffect(() => {
+        if(totalPaginas === 0){
+            setPageAtual(1);
+        }else if (pageAtual > totalPaginas){
+            setPageAtual(totalPaginas);
+        }
+        
+    },[categorias.length, pageAtual]);
 
     return(
         <div className=" w-[95%] min-h-96">
-            <Card className=" w-[50%] min-h-96 max-h-120 p-4 mx-auto mt-30">
+            <Card className=" w-[50%] min-h-96  p-4 mx-auto mt-30">
                 <CardTitle className="text-3xl justify-center flex">CATEGORIAS</CardTitle>
                 <CardContent>
                     <ul>
@@ -111,25 +120,27 @@ export default function CategoriaCard() {
                         </li>
                         ))}
                     </ul>
-                    <div className="flex justify-between mt-2">
-                        <Button
-                        variant="ghost"
-                        disabled= {pageAtual === 1}
-                        onClick={() => setPageAtual(pageAtual - 1)}>
-                            Anterior
-                        </Button>
-                        <p>Página {pageAtual} de {totalPaginas}</p>
-                        <Button
-                        variant="ghost"
-                        disabled={pageAtual === totalPaginas}
-                        onClick={() => setPageAtual(pageAtual + 1)}>
-                            Próxima
-                        </Button>
-                    </div>
-                    
-
                 </CardContent>
-                <CardFooter className="gap-2">
+                <div className="flex justify-between mt-2">
+                    <Button
+                    variant="ghost"
+                    disabled= {pageAtual === 1}
+                    onClick={() => setPageAtual(p => p - 1)}
+                    >
+                        <ChevronLeft className="size-[22px]"/>
+                    </Button>
+                    <p className="mt-1.5">
+                        Página {pageAtual} de {totalPaginas === 0 ? 1 : totalPaginas}
+                    </p>
+                    <Button
+                    variant="ghost"
+                    disabled={pageAtual === totalPaginas || totalPaginas === 0}
+                    onClick={() => setPageAtual(p => p + 1)}
+                    >
+                        <ChevronRight className="size-[22px]"/>
+                    </Button>
+                </div>
+                <CardFooter className="gap-2 mt-auto">  
                 <Input
                     placeholder="Digite sua Categoria"
                     value={novaCategoria}

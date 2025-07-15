@@ -19,8 +19,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="">
       <body
-        className={`antialiased`}
-      >
+        className={`antialiased`} suppressHydrationWarning>
         {children}
         <AosInit />
       </body>
