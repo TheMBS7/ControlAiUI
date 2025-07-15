@@ -12,8 +12,6 @@ export default function Home() {
   const titulo =`text-7xl mt-25 md:text-9xl italic font-bold ${audiowide.className} relative inline-block`;
 
   return (
-    
-
     <section >
       <div className="text-center">
         <div>
@@ -21,7 +19,7 @@ export default function Home() {
         </div>
 
         <div className="mt-15 flex justify-center">
-          <h1 className={botaoClasse}>Meu Perfil</h1>
+          <Link href="perfil" className={botaoClasse}>Meu Perfil</Link>
         </div>
 
         <div className="mt-15 flex justify-center">
@@ -31,14 +29,7 @@ export default function Home() {
         <div className="mt-15 flex justify-center">
           <Link href="configuracao" className={botaoClasse}>Configuração</Link>
         </div>
-        
       </div>
-      
     </section>
-      
-        
-      
-
-
   );
 }

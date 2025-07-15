@@ -123,7 +123,7 @@ export default function PessoasCard() {
                         disabled={paginaAtual === 1}
                         onClick={() => setPaginaAtual(p => p - 1)}
                     >
-                        <ChevronLeft className="size-[22px]"/>
+                        <ChevronLeft className="size-[22px] text-[#12698A]"/>
                     </Button> 
                     <p className="mt-1.5">
                         Página {paginaAtual} de {totalPaginas === 0 ? 1 : totalPaginas}
@@ -133,7 +133,7 @@ export default function PessoasCard() {
                         disabled={paginaAtual === totalPaginas || totalPaginas === 0}
                         onClick={() => setPaginaAtual(p => p + 1)}
                     >
-                        <ChevronRight className="size-[22px]"/>
+                        <ChevronRight className="size-[22px] text-[#12698A]"/>
                     </Button>
                 </div>
 

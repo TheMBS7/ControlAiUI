@@ -32,6 +32,5 @@ export default function Configuracao() {
         <PessoasCard />
       </div>
     </div>
-    
   )
 }

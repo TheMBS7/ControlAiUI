@@ -127,7 +127,7 @@ export default function CategoriaCard() {
                     disabled= {pageAtual === 1}
                     onClick={() => setPageAtual(p => p - 1)}
                     >
-                        <ChevronLeft className="size-[22px]"/>
+                        <ChevronLeft className="size-[22px] text-[#12698A]"/>
                     </Button>
                     <p className="mt-1.5">
                         Página {pageAtual} de {totalPaginas === 0 ? 1 : totalPaginas}
@@ -137,7 +137,7 @@ export default function CategoriaCard() {
                     disabled={pageAtual === totalPaginas || totalPaginas === 0}
                     onClick={() => setPageAtual(p => p + 1)}
                     >
-                        <ChevronRight className="size-[22px]"/>
+                        <ChevronRight className="size-[22px] text-[#12698A]"/>
                     </Button>
                 </div>
                 <CardFooter className="gap-2 mt-auto">  
