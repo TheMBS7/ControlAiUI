@@ -36,9 +36,9 @@ export default function CategoriaCard() {
             await criarCategoria(novaCategoria);
             setNovaCategoria("");
             await carregarCategorias();
-            } catch (erro) {
+        } catch (erro) {
             console.error(erro);
-            }
+        }
     }
 
     async function handleDelete(id: number){
@@ -74,6 +74,7 @@ export default function CategoriaCard() {
         }
         
     },[categorias.length, pageAtual]);
+
 
     return(
         <div className=" w-[95%] min-h-96">

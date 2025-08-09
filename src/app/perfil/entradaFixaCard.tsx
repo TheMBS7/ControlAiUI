@@ -1,78 +1,326 @@
 'use client'
 
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { fetchEntradasFixas } from "../services/entradaFixaService";
+import { criarEntradaFixa, deletarEntradaFixa, editarEntradaFixa, fetchEntradasFixas } from "@/app/services/entradaFixaService";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash, Check, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Pencil, Trash, Check, ChevronRight, ChevronLeft, ChevronDownIcon } from 'lucide-react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { NumericFormat } from 'react-number-format';
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar"
 
 export default function EntradaFixaCard(){
-    const [entradasFixas, setEntradasFixas] = useState<{id: number; descricao:string; valor:number; dataReferencia:Date}[]>([])
-    
+    const [entradasFixas, setEntradasFixas] = useState<EntradaFixa[]>([]);
+    const [novaEntradaFixa, setNovaEntradaFixa ] = useState<EntradaFixa | undefined>(undefined);
+    const [mostrarForm, setMostrarForm] = useState(false)
+    const [open, setOpen] = useState(false)
+    const [date, setDate] = useState<Date | undefined>(undefined)
+    const [entradaSendoEditada, setEntradaSendoEditada] = useState<EntradaFixa | undefined>(undefined);
+
+
     useEffect(() => {
         carregarEntradasFixas();
     },[])
-
     
+
     async function carregarEntradasFixas() {
         try{
-            const data = await fetchEntradasFixas()
-            setEntradasFixas(data)
+            const data = await fetchEntradasFixas();
+            setEntradasFixas(data);
         } catch(erro){
             console.error("Erro ao carregar pessoas:", erro);
         }
     }
     
-    
+    async function handleCriar() {
+        if(!novaEntradaFixa) return;
+        
+        if(!novaEntradaFixa.descricao.trim() || !date) return;
+
+        try{
+            await criarEntradaFixa(
+                novaEntradaFixa.descricao, 
+                novaEntradaFixa.valor, 
+                date
+            );
+
+            setNovaEntradaFixa(undefined);
+
+            setDate(undefined);
+            setMostrarForm(false);
+            await carregarEntradasFixas();
+        }catch(erro){
+            console.error(erro);
+        }
+    }
+
+    async function handleDelete(id: number) {
+        try{
+            await deletarEntradaFixa(id)
+            await carregarEntradasFixas();
+        }catch(erro){
+            console.error(erro)
+        }
+    }
+
+    async function handleEditar() {
+        
+        if(!entradaSendoEditada) return;
+
+        try{
+            await editarEntradaFixa(
+                entradaSendoEditada.id, 
+                entradaSendoEditada.descricao, 
+                entradaSendoEditada.valor, 
+                entradaSendoEditada.dataReferencia
+            );
+
+            setDate(undefined)
+            await carregarEntradasFixas();
+
+        }catch(erro){
+            console.log(erro)
+        }
+        
+    }
     
     return(
-        <div className="w-[95%] bg-amber-300">
-            <Card className="w-[50%] mx-auto">
+        <div className="w-[95%] bg">
+            <Card className="w-[30%] mx-auto">
                 <CardHeader>
-                    <CardTitle className="flex justify-center text-3xl">Entradas Fixas no Mês</CardTitle>
+                    <CardTitle className=" text-3xl">Entradas Fixas no Mês</CardTitle>
                     <CardAction>
                         <Button
                         variant="secondary"
                         className="bg-[#12698A] font-bold"
+                        onClick={() => setMostrarForm(true)}
                         >
                             <p>Nova Entrada</p>    
                         </Button>
+                        {mostrarForm && (
+                            <>
+                                <div className="fixed inset-0 bg-background opacity-60 z-40"></div>
+                                <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 w-[90%] max-w-xl shadow-lg">
+                                    <CardTitle>Cadastro de Nova Entrada</CardTitle>
+                                    <CardContent className="flex gap-2">
+                                        <Input
+                                        placeholder="Digite a descrição"
+                                        value={novaEntradaFixa?.descricao ?? ""} // valida se a descrição estiver nula, inicializa com string vazia. Precisa disso pois o input não gosta de iniciar undefined e virar string no meio.
+                                        onChange={(e => setNovaEntradaFixa((prev) => ({
+                                            ...prev!, //aqui matém os outros campos da novaEntradaFixa como estão e atualiza somente o da condição de baixo
+                                            descricao: e.target.value //aqui eu escolho qual o campo eu to atualizando nesse input
+                                        })))}>
+                                        </Input>
+                                        <NumericFormat
+                                        className=""
+                                        value={novaEntradaFixa?.valor ?? 0}
+                                        thousandSeparator="."
+                                        decimalSeparator=","
+                                        prefix="R$ "
+                                        decimalScale={2}
+                                        allowNegative={false}
+                                        customInput={Input}
+                                        onValueChange={(values) => {
+                                            setNovaEntradaFixa((prev) => ({
+                                            ...prev!,
+                                             valor: values.floatValue ?? 0 // Atualiza o valor ou coloca zero
+                                            }));
+                                        }}
+                                        />
+                                        <Popover open={open} onOpenChange={setOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                variant="ghost"
+                                                id="date"
+                                                className="w-40 justify-between font-normal"
+                                                >
+                                                {date ? date.toLocaleDateString() : "Selecione a Data"}
+                                                <ChevronDownIcon/>    
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                                <Calendar
+                                                mode="single"
+                                                selected={date}
+                                                captionLayout="dropdown"
+                                                onSelect={(date) => {
+                                                    setDate(date)
+                                                    setOpen(false)
+                                                }}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </CardContent>
+                                    <CardFooter className="gap-2">
+                                        <Button
+                                        variant="secondary"
+                                        className="bg-[#12698A] font-bold"
+                                        onClick={() => {
+                                            setMostrarForm(false);
+                                            setNovaEntradaFixa(undefined);
+                                            setDate(undefined)
+                                            }}>
+                                            Cancelar
+                                        </Button>
+                                        <Button
+                                        variant="secondary"
+                                        className="bg-[#12698A] font-bold"
+                                        onClick={() => {
+                                            handleCriar()
+                                        }}
+                                        >
+                                            Salvar
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            </>
+                            
+                        )}
                     </CardAction>
                 </CardHeader>
                 <CardContent>
-                {entradasFixas.map((entradaFixa) => (
-                    <div key={entradaFixa.id} className="flex p-1 border-b border-foreground">
-                        <div className="w-1/3 flex">
-                            <Button
-                            variant="ghost"
-                            >
-                                <Pencil className="text-blue-500"/>
-                            </Button>
-                            <Button
-                            variant="ghost"
-                            >
-                                <Trash className="text-red-500"/>
-                            </Button>
-                            <p className="p-1 mt-1">Descrição: {entradaFixa.descricao}</p>
-                        </div>
-                        <div className="w-1/3">
-                            <p className="p-1 mt-1">
-                            Valor:{" "}
-                            {new Intl.NumberFormat("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                            }).format(entradaFixa.valor)}
-                            </p>
-                        </div>
-                        <div className="w-1/3">
-                            <p className="p-1 mt-1">Data: {new Date(entradaFixa.dataReferencia).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                ))}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead></TableHead>
+                                <TableHead className="font-bold">DESCRIÇÃO</TableHead>
+                                <TableHead className="font-bold">VALOR</TableHead>
+                                <TableHead className="font-bold">REFERÊNCIA</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {entradasFixas.map((entradaFixa) => (
+                            <TableRow key={entradaFixa.id}>
+                                <TableCell>
+                                    <Button
+                                    variant="ghost"
+                                    onClick={() =>{
+                                        console.log(entradaFixa)
+                                        setEntradaSendoEditada({...entradaFixa,
+                                            dataReferencia: new Date(entradaFixa.dataReferencia)
+                                        })
+                                        console.log(entradaFixa)
+                                    }}
+                                    >
+                                        <Pencil className="text-blue-500"/>
+                                    </Button>
+                                   {entradaSendoEditada?.id === entradaFixa.id &&
+                                    <>
+                                        <div className="fixed inset-0 bg-background opacity-60 z-40"></div>
+                                        <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 w-[90%] max-w-xl shadow-lg">
+                                            <CardTitle>Edição de Entrada</CardTitle>
+                                            <CardContent className="flex gap-2">
+                                                <Input
+                                                placeholder="Digite a descrição"
+                                                value={entradaSendoEditada?.descricao}
+                                                onChange={(e => setEntradaSendoEditada((prev) => ({
+                                                    ...prev!, //aqui matém os outros campos da novaEntradaFixa como estão e atualiza somente o da condição de baixo
+                                                    descricao: e.target.value //aqui eu escolho qual o campo eu to atualizando nesse input
+                                                })))}>
+                                                </Input>
+                                                <NumericFormat
+                                                className=""
+                                                value={entradaSendoEditada?.valor}
+                                                thousandSeparator="."
+                                                decimalSeparator=","
+                                                prefix="R$ "
+                                                decimalScale={2}
+                                                allowNegative={false}
+                                                customInput={Input}
+                                                onValueChange={(values) => {
+                                                    setEntradaSendoEditada((prev) => ({
+                                                    ...prev!,
+                                                    valor: values.floatValue ?? 0 // Atualiza o valor ou coloca zero
+                                                    }));
+                                                }}
+                                                />
+                                                <Popover open={open} onOpenChange={setOpen}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                        variant="ghost"
+                                                        id="date"
+                                                        className="w-40 justify-between font-normal"
+                                                        >
+                                                         {entradaSendoEditada.dataReferencia ? entradaSendoEditada.dataReferencia.toLocaleDateString() : entradaFixa.dataReferencia ? new Date(entradaFixa.dataReferencia).toLocaleDateString() : "Selecione a Data"}
+                                                        <ChevronDownIcon/>    
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                                        <Calendar
+                                                        mode="single"
+                                                        selected={entradaSendoEditada.dataReferencia}
+                                                        captionLayout="dropdown"
+                                                        onSelect={(date) => {
+                                                            setEntradaSendoEditada((prev) => ({
+                                                                ...prev!,
+                                                                dataReferencia: date!
+                                                            }))
+                                                            setOpen(false)
+                                                        }}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
+                                            </CardContent>
+                                            <CardFooter className="gap-2">
+                                                <Button
+                                                variant="secondary"
+                                                className="bg-[#12698A] font-bold"
+                                                onClick={() => {
+                                                    setEntradaSendoEditada(undefined);
+                                                    setDate(undefined)
+                                                    }}>
+                                                    Cancelar
+                                                </Button>
+                                                <Button
+                                                variant="secondary"
+                                                className="bg-[#12698A] font-bold"
+                                                onClick={() => {
+                                                    handleEditar();
+                                                    setEntradaSendoEditada(undefined);
+                                                }}
+                                                >
+                                                    Salvar
+                                                </Button>
+                                            </CardFooter>
+                                        </Card>
+                                    </>
+                                   }
+                                       
+                                    
+                                    
+                                    <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        handleDelete(entradaFixa.id);
+                                    }}
+                                    >
+                                        <Trash className="text-red-500"/>
+                                    </Button>
+                                
+                                </TableCell>
+                                <TableCell>
+                                    {entradaFixa.descricao}
+                                </TableCell>
+                                <TableCell>
+                                    
+                                    {new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                    }).format(entradaFixa.valor)}
+                                    
+                                </TableCell>
+                                <TableCell>
+                                    {new Date(entradaFixa.dataReferencia).toLocaleDateString()}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
                 </CardContent>
-
             </Card>
         </div>
         
-    )
+    );
 }
