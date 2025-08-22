@@ -32,7 +32,10 @@ export async function deleteCategoria(id: number) {
   });
 
   if (!res.ok) {
-    throw new Error('Erro ao deletar categoria');
+    // throw new Error('Erro ao deletar categoria');
+    const msgErro = await res.text();
+    alert(msgErro);
+    return;
   }
 
   return await res.json(); // se a API retornar algo

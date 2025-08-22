@@ -10,13 +10,13 @@ export async function fetchEntradasFixas():Promise<EntradaFixa[]> {
     return res.json() as Promise<EntradaFixa[]>;
 }
 
-export async function criarEntradaFixa(descricao: string, valor: number, data: Date) {
+export async function criarEntradaFixa(entradaFixa: EntradaFixa) {
     const response = await fetch(`${BASE_URL}/Create-EntradasFixas`,{
         method: 'POST',
         headers:{
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ descricao, valor, dataReferencia: data.toISOString()})
+        body: JSON.stringify(entradaFixa)
     });
     if (!response.ok) throw new Error("Erro ao criar Entrada Fixa");
 
@@ -24,13 +24,13 @@ export async function criarEntradaFixa(descricao: string, valor: number, data: D
 
 }
 
-export async function editarEntradaFixa(id: number, descricao: string, valor: number, data: Date) {
-    const response = await fetch(`${BASE_URL}/Edit/${id}`,{
+export async function editarEntradaFixa(entradaFixa: EntradaFixa) {
+    const response = await fetch(`${BASE_URL}/Edit/${entradaFixa.id}`,{
         method: 'PUT',
         headers:{
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({descricao, valor, dataReferencia: data.toISOString()})
+        body: JSON.stringify(entradaFixa)
     });
     if (!response.ok) throw new Error("Erro ao editar Entrada Fixa");
 

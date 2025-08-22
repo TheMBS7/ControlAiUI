@@ -4,7 +4,7 @@ import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from
 import { useEffect, useState } from "react";
 import { criarEntradaFixa, deletarEntradaFixa, editarEntradaFixa, fetchEntradasFixas } from "@/app/services/entradaFixaService";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash, Check, ChevronRight, ChevronLeft, ChevronDownIcon } from 'lucide-react'
+import { Pencil, Trash, ChevronDownIcon } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { NumericFormat } from 'react-number-format';
@@ -16,7 +16,6 @@ export default function EntradaFixaCard(){
     const [novaEntradaFixa, setNovaEntradaFixa ] = useState<EntradaFixa | undefined>(undefined);
     const [mostrarForm, setMostrarForm] = useState(false)
     const [open, setOpen] = useState(false)
-    const [date, setDate] = useState<Date | undefined>(undefined)
     const [entradaSendoEditada, setEntradaSendoEditada] = useState<EntradaFixa | undefined>(undefined);
 
 
@@ -37,18 +36,11 @@ export default function EntradaFixaCard(){
     async function handleCriar() {
         if(!novaEntradaFixa) return;
         
-        if(!novaEntradaFixa.descricao.trim() || !date) return;
+        if(!novaEntradaFixa.descricao.trim()) return;
 
         try{
-            await criarEntradaFixa(
-                novaEntradaFixa.descricao, 
-                novaEntradaFixa.valor, 
-                date
-            );
-
+            await criarEntradaFixa(novaEntradaFixa);
             setNovaEntradaFixa(undefined);
-
-            setDate(undefined);
             setMostrarForm(false);
             await carregarEntradasFixas();
         }catch(erro){
@@ -65,19 +57,12 @@ export default function EntradaFixaCard(){
         }
     }
 
-    async function handleEditar() {
+    async function handleEditar(entradaFixa: EntradaFixa) {
         
         if(!entradaSendoEditada) return;
 
         try{
-            await editarEntradaFixa(
-                entradaSendoEditada.id, 
-                entradaSendoEditada.descricao, 
-                entradaSendoEditada.valor, 
-                entradaSendoEditada.dataReferencia
-            );
-
-            setDate(undefined)
+            await editarEntradaFixa(entradaFixa);
             await carregarEntradasFixas();
 
         }catch(erro){
@@ -87,13 +72,13 @@ export default function EntradaFixaCard(){
     }
     
     return(
-        <div className="w-[95%] bg">
-            <Card className="w-[30%] mx-auto">
+        <div className="">
+            <Card className="w-[70%] mx-auto">
                 <CardHeader>
                     <CardTitle className=" text-3xl">Entradas Fixas no Mês</CardTitle>
                     <CardAction>
                         <Button
-                        variant="secondary"
+                        variant="ghost"
                         className="bg-[#12698A] font-bold"
                         onClick={() => setMostrarForm(true)}
                         >
@@ -136,17 +121,20 @@ export default function EntradaFixaCard(){
                                                 id="date"
                                                 className="w-40 justify-between font-normal"
                                                 >
-                                                {date ? date.toLocaleDateString() : "Selecione a Data"}
+                                                {novaEntradaFixa?.dataReferencia ? novaEntradaFixa.dataReferencia.toLocaleDateString() : "Selecione a Data"}
                                                 <ChevronDownIcon/>    
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto overflow-hidden p-0" align="start">
                                                 <Calendar
                                                 mode="single"
-                                                selected={date}
+                                                selected={novaEntradaFixa?.dataReferencia}
                                                 captionLayout="dropdown"
                                                 onSelect={(date) => {
-                                                    setDate(date)
+                                                    setNovaEntradaFixa((prev) => ({
+                                                        ...prev!,
+                                                        dataReferencia: new Date(date!)
+                                                    }))
                                                     setOpen(false)
                                                 }}
                                                 />
@@ -155,17 +143,16 @@ export default function EntradaFixaCard(){
                                     </CardContent>
                                     <CardFooter className="gap-2">
                                         <Button
-                                        variant="secondary"
+                                        variant="ghost"
                                         className="bg-[#12698A] font-bold"
                                         onClick={() => {
                                             setMostrarForm(false);
                                             setNovaEntradaFixa(undefined);
-                                            setDate(undefined)
                                             }}>
                                             Cancelar
                                         </Button>
                                         <Button
-                                        variant="secondary"
+                                        variant="ghost"
                                         className="bg-[#12698A] font-bold"
                                         onClick={() => {
                                             handleCriar()
@@ -243,7 +230,7 @@ export default function EntradaFixaCard(){
                                                         id="date"
                                                         className="w-40 justify-between font-normal"
                                                         >
-                                                         {entradaSendoEditada.dataReferencia ? entradaSendoEditada.dataReferencia.toLocaleDateString() : entradaFixa.dataReferencia ? new Date(entradaFixa.dataReferencia).toLocaleDateString() : "Selecione a Data"}
+                                                         {entradaSendoEditada?.dataReferencia ? new Date(entradaSendoEditada.dataReferencia).toLocaleDateString() : "Selecione a Data"}
                                                         <ChevronDownIcon/>    
                                                         </Button>
                                                     </PopoverTrigger>
@@ -265,19 +252,18 @@ export default function EntradaFixaCard(){
                                             </CardContent>
                                             <CardFooter className="gap-2">
                                                 <Button
-                                                variant="secondary"
+                                                variant="ghost"
                                                 className="bg-[#12698A] font-bold"
                                                 onClick={() => {
                                                     setEntradaSendoEditada(undefined);
-                                                    setDate(undefined)
                                                     }}>
                                                     Cancelar
                                                 </Button>
                                                 <Button
-                                                variant="secondary"
+                                                variant="ghost"
                                                 className="bg-[#12698A] font-bold"
                                                 onClick={() => {
-                                                    handleEditar();
+                                                    handleEditar(entradaSendoEditada);
                                                     setEntradaSendoEditada(undefined);
                                                 }}
                                                 >
@@ -287,9 +273,6 @@ export default function EntradaFixaCard(){
                                         </Card>
                                     </>
                                    }
-                                       
-                                    
-                                    
                                     <Button
                                     variant="ghost"
                                     onClick={() => {
