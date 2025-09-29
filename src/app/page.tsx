@@ -19,7 +19,7 @@ export default function Home() {
         </div>
 
         <div className="mt-15 flex justify-center">
-          <Link href="perfil" className={botaoClasse}>Meu Perfil</Link>
+          <Link href="perfil" className={botaoClasse}>Movimentos Fixos</Link>
         </div>
 
         <div className="mt-15 flex justify-center">

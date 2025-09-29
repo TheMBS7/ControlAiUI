@@ -72,7 +72,7 @@ export default function EntradaFixaCard(){
     }
     
     return(
-        <div className="">
+        <div className="mt-30">
             <Card className="w-[70%] mx-auto">
                 <CardHeader>
                     <CardTitle className=" text-3xl">Entradas Fixas no Mês</CardTitle>
@@ -88,7 +88,9 @@ export default function EntradaFixaCard(){
                             <>
                                 <div className="fixed inset-0 bg-background opacity-60 z-40"></div>
                                 <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 w-[90%] max-w-xl shadow-lg">
-                                    <CardTitle>Cadastro de Nova Entrada</CardTitle>
+                                    <CardHeader>    
+                                        <CardTitle>Cadastro de Nova Entrada</CardTitle>
+                                    </CardHeader>
                                     <CardContent className="flex gap-2">
                                         <Input
                                         placeholder="Digite a descrição"
@@ -197,7 +199,9 @@ export default function EntradaFixaCard(){
                                     <>
                                         <div className="fixed inset-0 bg-background opacity-60 z-40"></div>
                                         <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4 w-[90%] max-w-xl shadow-lg">
-                                            <CardTitle>Edição de Entrada</CardTitle>
+                                            <CardHeader>
+                                                <CardTitle className='text-2xl'>Edição de Entrada Fixa</CardTitle>
+                                            </CardHeader>
                                             <CardContent className="flex gap-2">
                                                 <Input
                                                 placeholder="Digite a descrição"
@@ -287,12 +291,10 @@ export default function EntradaFixaCard(){
                                     {entradaFixa.descricao}
                                 </TableCell>
                                 <TableCell>
-                                    
                                     {new Intl.NumberFormat("pt-BR", {
                                         style: "currency",
                                         currency: "BRL",
                                     }).format(entradaFixa.valor)}
-                                    
                                 </TableCell>
                                 <TableCell>
                                     {new Date(entradaFixa.dataReferencia).toLocaleDateString()}

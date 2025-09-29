@@ -17,3 +17,21 @@ interface Categoria {
     id: number;
     nome: string;
 }
+
+interface Extrato {
+    id: number;
+    descricao: string;
+    valorTotal: number;
+    data: Date;
+    numeroMaxParcelas: number;
+    numeroParcela: number;
+    categoriaId: number;
+    pessoaId: number;
+    mesId: number;
+    
+}
+
+interface Pessoa {
+    id: number;
+    nome: string;
+}

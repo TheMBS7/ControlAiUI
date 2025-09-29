@@ -5,7 +5,11 @@ export async function fetchCategorias() {
     cache: 'no-store'
   });
 
-  if (!res.ok) throw new Error('Erro ao buscar categorias');
+  if (!res.ok) {
+    const errorText = await res.text(); // loga o que o servidor mandou
+    console.error("Backend error:", errorText);
+    throw new Error('Erro ao buscar categorias');
+  }
 
   return res.json();
 }
@@ -26,9 +30,7 @@ export async function criarCategoria(nome: string) {
 
 export async function deleteCategoria(id: number) {
   const res = await fetch(`${BASE_URL}/Delete/${id}`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json'
-    }
+    method: 'DELETE'
   });
 
   if (!res.ok) {
@@ -38,7 +40,7 @@ export async function deleteCategoria(id: number) {
     return;
   }
 
-  return await res.json(); // se a API retornar algo
+  return true; // se a API retornar algo
 }
 
 export async function editarCategoria(id: number, nome: string) {

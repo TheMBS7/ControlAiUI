@@ -84,7 +84,7 @@ export default function  SaidaFixaCard(){
 
     // console.log("AQUI CATEGORIAAAA",categorias)
     return(
-        <div className="">
+        <div className="mt-30">
             <Card className="w-[80%] mx-auto">
                 <CardHeader>
                     <CardTitle className="text-3xl">Saídas Fixas no Mês</CardTitle>
@@ -239,7 +239,7 @@ export default function  SaidaFixaCard(){
                                         <div className="fixed inset-0 bg-background opacity-60 z-40"></div>
                                         <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-4  max-w-3xl shadow-lg">
                                             <CardHeader>
-                                                <CardTitle>Edição de Saída Fixa</CardTitle>
+                                                <CardTitle className='text-2xl'>Edição de Saída Fixa</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex gap-2">
                                                 <Input

@@ -16,7 +16,10 @@ export async function criarEntradaFixa(entradaFixa: EntradaFixa) {
         headers:{
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(entradaFixa)
+       body: JSON.stringify({
+            ...entradaFixa,
+            dataReferencia: entradaFixa.dataReferencia.toISOString()
+        })
     });
     if (!response.ok) throw new Error("Erro ao criar Entrada Fixa");
 

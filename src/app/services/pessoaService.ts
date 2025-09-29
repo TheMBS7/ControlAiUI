@@ -27,16 +27,13 @@ export async function criarPessoa(nome: string) {
 export async function deletarPessoa(id: number) {
   const res = await fetch(`${BASE_URL}/Delete/${id}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json'
-    }
   });
 
   if (!res.ok) {
     throw new Error('Erro ao deletar Pessoa');
   }
 
-  return await res.json();
+  return true;
 }
 
 export async function editarPessoa(id: number, nome: string) {

@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, 
 export default function Configuracao() {
   return (
     <div className="relative">
-      <div className=" absolute mt-8 left-1/2 -translate-x-1/2">
+      {/* <div className=" absolute mt-8 left-1/2 -translate-x-1/2">
         <AlertDialog>
           <AlertDialogTrigger>
             <Button variant="ghost" className="bg-[#12698a] text-black font-bold rounded-full">?</Button>
@@ -26,7 +26,7 @@ export default function Configuracao() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
+      </div> */}
       <div className="grid justify-items-center grid-cols-1 lg:grid-cols-2">
         <CategoriaCard />
         <PessoasCard />
