@@ -72,7 +72,7 @@ export default function EntradaFixaCard(){
     }
     
     return(
-        <div className="mt-30">
+        <div>
             <Card className="w-[70%] mx-auto">
                 <CardHeader>
                     <CardTitle className=" text-3xl">Entradas Fixas no Mês</CardTitle>

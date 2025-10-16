@@ -28,6 +28,7 @@ interface Extrato {
     categoriaId: number;
     pessoaId: number;
     mesId: number;
+    tipoMovimentoId: number;
     
 }
 
@@ -35,3 +36,20 @@ interface Pessoa {
     id: number;
     nome: string;
 }
+
+interface Mes {
+    id: number;
+    descricao: string;
+    dataInicial: Date;
+    dataFinal: Date;
+}
+
+interface TipoMovimento {
+    id: number,
+    tipo: string
+}
+
+interface TotalMes {
+        mesId: number,
+        totalMes: number
+    }

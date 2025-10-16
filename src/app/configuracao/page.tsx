@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogTitle, 
 
 export default function Configuracao() {
   return (
-    <div className="relative">
+    <div className="relative mt-[80px]">
       {/* <div className=" absolute mt-8 left-1/2 -translate-x-1/2">
         <AlertDialog>
           <AlertDialogTrigger>

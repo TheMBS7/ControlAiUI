@@ -11,6 +11,22 @@ export async function fetchExtratos() {
   return res.json();
 }
 
+export async function fetchExtratoId(mesId) : Promise<Extrato[]> {
+  const res = await fetch(`${BASE_URL}/Display-Extrato/${mesId}`, {
+    cache: 'no-store' // para sempre buscar dados atualizados
+  });
+
+  if(res.status === 404) {
+    return [];
+  }
+
+  if (!res.ok) {
+    throw new Error('Falha ao carregar os extratos');
+  }
+  return res.json();
+}
+
+
 export async function createExtrato(extrato: Extrato) {
   const response = await fetch(`${BASE_URL}/Create-Extratos`,{
     method: "POST",

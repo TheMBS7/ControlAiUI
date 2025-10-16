@@ -1,6 +1,7 @@
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { AosInit } from "./_components/aos-init";
+import { Header } from "@/components/ui/header";
 
 
 const nunito = Nunito({
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="pt-BR" className="">
       <body
         className={`antialiased`} suppressHydrationWarning>
+        <Header/>
         {children}
         <AosInit />
       </body>

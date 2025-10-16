@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function  MeuPerfil(){
     
     return (
-        <div className="relative">
+        <div className="relative mt-[80px]">
             <div className="mt-8 absolute left-1/2 -translate-x-1/2">
                 {/* <AlertDialog>
                     <AlertDialogTrigger>

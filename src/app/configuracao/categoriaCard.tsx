@@ -78,7 +78,7 @@ export default function CategoriaCard() {
 
     return(
         <div className=" w-[95%] min-h-96">
-            <Card className=" w-[50%] min-h-96  p-4 mx-auto mt-30">
+            <Card className=" w-[50%] min-h-96  p-4 mx-auto">
                 <CardTitle className="text-3xl justify-center flex">CATEGORIAS</CardTitle>
                 <CardContent>
                     <ul>

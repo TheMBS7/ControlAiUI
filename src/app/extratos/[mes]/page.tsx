@@ -1,8 +1,11 @@
 'use client'
 
+import { calculoTotal } from '@/app/services/calculoTotalService';
 import { fetchCategorias } from '@/app/services/categoriaService';
-import { createExtrato, deleteExtrato, editExtrato, fetchExtratos } from '@/app/services/extratoService';
+import { createExtrato, deleteExtrato, editExtrato, fetchExtratoId, fetchExtratos } from '@/app/services/extratoService';
+import { fetchPeriodosId } from '@/app/services/mesService';
 import { fetchPessoas } from '@/app/services/pessoaService';
+import { fetchMovimentos } from '@/app/services/tipoMovimentoService';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDownIcon, Pencil, Trash } from 'lucide-react';
+import { ChevronDownIcon, Pencil, Trash, CircleArrowUp, CircleArrowDownIcon } from 'lucide-react';
 import React, { use, useEffect, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 
@@ -22,13 +25,14 @@ export default function ExtratosPage({
 })  {
   const [extratos, setExtratos] = useState<Extrato[]>([]);
   const {mes} = use(params); // Pega o Id o Mês que o o usuario clicou na pag de extratos, pega como string. O id veio na URL
-  const mesesName = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"]
+  const [mesBanco, setMesBanco] = useState<Mes>()
   const [openCriacao, setOpenCriacao] = useState(false)
   const [openEdicao, setOpenEdicao] = useState(false)
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
+  const [tipoMovimento, setTipoMovimento] = useState<TipoMovimento[]>([]);
   const [totalSomado, setTotalSomado] = useState(0);
-  const extratosFiltrados = extratos.filter((extrato: any) => extrato.mesId === parseInt(mes)); //verificar alternativas
+  //const extratosFiltrados = extratos.filter((extrato: any) => extrato.mesId === parseInt(mes)); //verificar alternativas
   const [novoExtrato, setNovoExtrato] = useState<Extrato | undefined>(undefined);
   const [extratoSendoEditado, setExtratoSendoEditado] = useState<Extrato | undefined>(undefined);
   const [excluirTodasParcelas, setExcluirTodasParcelas] = useState(false);
@@ -38,19 +42,21 @@ export default function ExtratosPage({
     carregarExtratos();
     buscarPessoas();
     buscarCategorias();
-    
+    buscarTipoMovimento();
   },[mes])
 
   useEffect(() => {
-    calculoTotal();
-  },[extratosFiltrados])
+    if(mesBanco){
+      calculandoTotal()
+    }
+  },[extratos])
   
-
   async function carregarExtratos() {
   try{
-      const data = await fetchExtratos();
+      const mesBanco = await fetchPeriodosId(parseInt(mes))
+      setMesBanco(mesBanco);
+      const data = await fetchExtratoId(mes);
       setExtratos(data)
-      calculoTotal();
   }catch(erro){
       console.error("Erro ao carregar extrato do Mês", erro)
   }
@@ -74,18 +80,30 @@ export default function ExtratosPage({
     }
   }
 
- async function calculoTotal() {
-  try {
-    let totalMes = 0
-    extratosFiltrados.forEach((extrato) => {
-      totalMes += Number(extrato.valorTotal)
-    })
-    setTotalSomado(totalMes)
-  } catch (erro) {
-    console.error("erro para calcular o total do mês", erro)
+    async function buscarTipoMovimento() {
+    try{
+      const tipoMovimentoList = await fetchMovimentos();
+      setTipoMovimento(tipoMovimentoList)
+    }catch(erro){
+      console.error('Erro ao buscar tipos de movimento', erro)
+    }
   }
-}
- 
+
+  async function calculandoTotal() {
+    try{
+      const ano = new Date(mesBanco?.dataInicial!).getUTCFullYear();
+      const data = await calculoTotal(ano)
+      const mesAtual = data.find((m) => m.mesId === parseInt(mes))
+      console.log("OLHA ELE AQUIIIIIIIIIIIIIII", ano)
+      if(mesAtual){
+        setTotalSomado(mesAtual.totalMes)
+      }
+      
+    }catch(erro){
+      console.error("erro ao calcular total do mês", erro)
+    }
+  }
+
   async function handleCriar() {
     if(!novoExtrato) return;
 
@@ -127,11 +145,11 @@ export default function ExtratosPage({
   }
 
   return (
-    <div>
+    <div className='mt-[80px]'>
       <Card className='w-[50%] mx-auto'>
         <CardHeader>
           <CardTitle className='font-bold text-4xl flex justify-center'>
-            Extrato do mês de {mesesName[Number(mes) - 1]}
+            Extrato do mês de {mesBanco?.descricao}
           </CardTitle>
           <CardAction>A pensar</CardAction>
         </CardHeader>
@@ -145,13 +163,16 @@ export default function ExtratosPage({
                 <TableHead className='font-bold'>CATEGORIA</TableHead>
                 <TableHead className='font-bold'>PESSOA</TableHead>
                 <TableHead className='font-bold'>PARCELAS</TableHead>
+                <TableHead className='font-bold'>TIPO</TableHead>
                 <TableHead className='text-right font-bold'>VALOR</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {extratosFiltrados.map((extrato) => {
+              {extratos.map((extrato) => {
                 const categoriaMapeada = categorias.find(categoria => categoria.id === extrato.categoriaId);
                 const pessoaMapeada = pessoas.find(pessoa => pessoa.id === extrato.pessoaId);
+                const tipoMovimentoMapeado = tipoMovimento.find(tipoMovimento => tipoMovimento.id === extrato.tipoMovimentoId);
+
                 return(
                 <TableRow key={extrato.id}>
                   <TableCell>
@@ -379,6 +400,7 @@ export default function ExtratosPage({
                   <TableCell>{categoriaMapeada?.nome}</TableCell>
                   <TableCell>{pessoaMapeada?.nome}</TableCell>
                   <TableCell>{extrato.numeroParcela + "/" + extrato.numeroMaxParcelas}</TableCell>
+                  <TableCell>{tipoMovimentoMapeado?.id === 1 ? <CircleArrowUp className='text-green-600'/> : <CircleArrowDownIcon className='text-red-600'/>}</TableCell>
                   <TableCell className='text-right'>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(extrato.valorTotal)}</TableCell>
                 </TableRow>
               )})}
@@ -386,7 +408,7 @@ export default function ExtratosPage({
             <TableFooter>
               <TableRow>
                 <TableCell></TableCell>
-                <TableCell colSpan={5} className='font-bold'>TOTAL</TableCell>
+                <TableCell colSpan={6} className='font-bold'>TOTAL</TableCell>
                 <TableCell className='text-right font-bold'>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSomado)}</TableCell>
               </TableRow>
             </TableFooter>
@@ -488,6 +510,31 @@ export default function ExtratosPage({
                 />
             </PopoverContent>
           </Popover>
+
+          <Select 
+            value={String(novoExtrato?.tipoMovimentoId ?? "")} 
+            onValueChange={(value) => {
+              setNovoExtrato((prev) => ({
+                ...prev!,
+                tipoMovimentoId: Number(value), // mantém o ID no estado
+              }));
+            }}
+          >
+            <SelectTrigger className="w-[20%]">
+              <SelectValue placeholder="Movimento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel className="text-center">Movimento</SelectLabel>
+                {tipoMovimento.map((movimento) => (
+                  <SelectItem value={String(movimento.id)} key={movimento.id}>
+                    {movimento.tipo}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
           <NumericFormat
           className="w-50"
           value={novoExtrato?.valorTotal ?? 0}
