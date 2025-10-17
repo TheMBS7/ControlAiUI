@@ -5,8 +5,7 @@ import { fetchPeriodos } from "../services/mesService"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchExtratoId } from "../services/extratoService";
-import { calculoTotal } from "../services/calculoTotalService";
+import { calcularTotalAno, fetchExtratoId } from "../services/extratoService";
 
 export default function Extratos(){
 
@@ -24,7 +23,7 @@ export default function Extratos(){
     
     useEffect(() => {
         carregarPeriodos();
-        calculandoTotal()
+        handleTotal()
     },[anoSelecionado])
 
      
@@ -44,46 +43,17 @@ export default function Extratos(){
 
     
 
-    async function calculandoTotal() {
+    async function handleTotal() {
         try{
-            const data = await calculoTotal(parseInt(anoSelecionado));
-            setTotalSomado(data ?? []);
+            const ano = parseInt(anoSelecionado);
+            const TotaisMeses = await calcularTotalAno(ano);
+            setTotalSomado(TotaisMeses)
         }catch(erro){
             alert("Erro ao calcular totais.")
         }
         
         
     }
-
-//    async function calculoTotal() {
-//         try {
-
-//             const data = await fetchPeriodos();
-//             const mesesFiltrados = data.filter((mes) => new Date(mes.dataInicial).getUTCFullYear() === parseInt(anoSelecionado));
-
-//             const idMes = [... new Set(mesesFiltrados.map((mes) => mes.id))]
-
-//             const resultados = await Promise.all(
-//                 idMes.map(async (id) => {
-//                     console.log("Buscando extrato do mês ID:", id)
-//                     const extratosFiltrados = await fetchExtratoId(id);
-
-//                     let totalMes = 0;
-//                     extratosFiltrados.forEach((extrato) => {
-//                         totalMes += Number(extrato.valorTotal);
-                        
-//                     });
-//                     console.log("printando o total", totalMes)
-//                     return {mesId: id, totalMes};
-//                 })
-//             );
-//             console.log("printando o resultado", resultados)
-//             setTotalSomado(resultados);
-
-//         } catch (erro) {
-//             console.error("erro para calcular o total do mês", erro)
-//         }
-//     }
 
     return (
 

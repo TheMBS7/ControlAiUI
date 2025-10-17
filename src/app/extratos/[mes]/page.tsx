@@ -1,8 +1,7 @@
 'use client'
 
-import { calculoTotal } from '@/app/services/calculoTotalService';
 import { fetchCategorias } from '@/app/services/categoriaService';
-import { createExtrato, deleteExtrato, editExtrato, fetchExtratoId, fetchExtratos } from '@/app/services/extratoService';
+import { calcularTotalMes, createExtrato, deleteExtrato, editExtrato, fetchExtratoId, fetchExtratos } from '@/app/services/extratoService';
 import { fetchPeriodosId } from '@/app/services/mesService';
 import { fetchPessoas } from '@/app/services/pessoaService';
 import { fetchMovimentos } from '@/app/services/tipoMovimentoService';
@@ -13,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDownIcon, Pencil, Trash, CircleArrowUp, CircleArrowDownIcon } from 'lucide-react';
+import { ChevronDownIcon, Pencil, Trash, CircleArrowUp, CircleArrowDownIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { use, useEffect, useState } from 'react';
 import { NumericFormat } from 'react-number-format';
 
@@ -23,20 +23,21 @@ export default function ExtratosPage({
 }: {
   params: Promise<{ mes: string }>
 })  {
-  const [extratos, setExtratos] = useState<Extrato[]>([]);
+  const router = useRouter()
   const {mes} = use(params); // Pega o Id o Mês que o o usuario clicou na pag de extratos, pega como string. O id veio na URL
-  const [mesBanco, setMesBanco] = useState<Mes>()
-  const [openCriacao, setOpenCriacao] = useState(false)
-  const [openEdicao, setOpenEdicao] = useState(false)
+  const mesNumero = Number(mes);
+  const [extratos, setExtratos] = useState<Extrato[]>([]);
+  const [mesBanco, setMesBanco] = useState<Mes>();
+  const [openCriacao, setOpenCriacao] = useState(false);
+  const [openEdicao, setOpenEdicao] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
   const [tipoMovimento, setTipoMovimento] = useState<TipoMovimento[]>([]);
-  const [totalSomado, setTotalSomado] = useState(0);
-  //const extratosFiltrados = extratos.filter((extrato: any) => extrato.mesId === parseInt(mes)); //verificar alternativas
   const [novoExtrato, setNovoExtrato] = useState<Extrato | undefined>(undefined);
   const [extratoSendoEditado, setExtratoSendoEditado] = useState<Extrato | undefined>(undefined);
   const [excluirTodasParcelas, setExcluirTodasParcelas] = useState(false);
   const [mostrarFormExclusao, setMostrarFormExclusao] = useState(false);
+  const [totalMes, setTotalMes] = useState<TotalMes>();
 
   useEffect(() => {
     carregarExtratos();
@@ -47,20 +48,34 @@ export default function ExtratosPage({
 
   useEffect(() => {
     if(mesBanco){
-      calculandoTotal()
+      handleTotal()
     }
   },[extratos])
   
   async function carregarExtratos() {
   try{
-      const mesBanco = await fetchPeriodosId(parseInt(mes))
+      const mesBanco = await fetchPeriodosId(mesNumero)
       setMesBanco(mesBanco);
-      const data = await fetchExtratoId(mes);
+      const data = await fetchExtratoId(mesNumero);
       setExtratos(data)
   }catch(erro){
       console.error("Erro ao carregar extrato do Mês", erro)
   }
 }
+
+  async function handleProximaPage() {
+    const mesDescricao = mesBanco?.descricao.toLowerCase();
+    if( mesDescricao != 'dezembro'){
+      router.push(`/extratos/${mesNumero + 1}`);
+    }
+    
+  }
+  async function handlePageAnterior() {
+    const mesDescricao = mesBanco?.descricao.toLowerCase();
+    if(mesDescricao != 'janeiro'){
+      router.push(`/extratos/${mesNumero - 1}`);
+    }
+  }
 
   async function buscarCategorias() {
     try{
@@ -89,16 +104,10 @@ export default function ExtratosPage({
     }
   }
 
-  async function calculandoTotal() {
+  async function handleTotal() {
     try{
-      const ano = new Date(mesBanco?.dataInicial!).getUTCFullYear();
-      const data = await calculoTotal(ano)
-      const mesAtual = data.find((m) => m.mesId === parseInt(mes))
-      console.log("OLHA ELE AQUIIIIIIIIIIIIIII", ano)
-      if(mesAtual){
-        setTotalSomado(mesAtual.totalMes)
-      }
-      
+      const valorTotal = await calcularTotalMes(parseInt(mes));
+      setTotalMes(valorTotal);
     }catch(erro){
       console.error("erro ao calcular total do mês", erro)
     }
@@ -151,7 +160,22 @@ export default function ExtratosPage({
           <CardTitle className='font-bold text-4xl flex justify-center'>
             Extrato do mês de {mesBanco?.descricao}
           </CardTitle>
-          <CardAction>A pensar</CardAction>
+          <CardAction>
+            <Button
+            variant="ghost"
+            disabled={mesBanco?.descricao.toLowerCase() === "janeiro"}
+            onClick={handlePageAnterior}
+            >
+              <ChevronLeft className="size-[22px] text-[#12698A]"/>
+            </Button>
+            <Button
+            variant="ghost"
+            disabled={mesBanco?.descricao.toLowerCase() === 'dezembro'}
+            onClick={handleProximaPage}
+            >
+              <ChevronRight className="size-[22px] text-[#12698A]"/>
+            </Button>
+          </CardAction>
         </CardHeader>
         <CardContent>
           <Table>
@@ -409,7 +433,7 @@ export default function ExtratosPage({
               <TableRow>
                 <TableCell></TableCell>
                 <TableCell colSpan={6} className='font-bold'>TOTAL</TableCell>
-                <TableCell className='text-right font-bold'>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSomado)}</TableCell>
+                <TableCell className='text-right font-bold'>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalMes?.totalMes ?? 0)}</TableCell>
               </TableRow>
             </TableFooter>
           </Table>
@@ -554,9 +578,7 @@ export default function ExtratosPage({
           <Button
           variant='ghost'
           className='bg-[#12698A] font-bold'
-          onClick={() => {
-            handleCriar()
-          }}
+          onClick={handleCriar}
           >
             Enviar
           </Button>

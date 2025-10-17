@@ -11,7 +11,7 @@ export async function fetchExtratos() {
   return res.json();
 }
 
-export async function fetchExtratoId(mesId) : Promise<Extrato[]> {
+export async function fetchExtratoId(mesId : number) : Promise<Extrato[]> {
   const res = await fetch(`${BASE_URL}/Display-Extrato/${mesId}`, {
     cache: 'no-store' // para sempre buscar dados atualizados
   });
@@ -65,4 +65,24 @@ export async function editExtrato(extrato: Extrato) {
     body: JSON.stringify(extrato)
   });
   if(!responde.ok) throw new Error("Erro ao editar Extrato")
+}
+
+export async function calcularTotalMes(id: number) {
+  const response = await fetch(`${BASE_URL}/Display-Total-Mes/${id}`,{
+    cache: "no-store"
+  });
+  if(!response.ok) throw new Error("Erro ao calcular total mês.");
+
+  return response.json();
+  
+}
+
+export async function calcularTotalAno(ano: number) : Promise<TotalMes[]> {
+  const response = await fetch(`${BASE_URL}/Display-Total/${ano}`,{
+    cache: "no-store"
+  });
+  if(!response.ok) throw new Error("Erro ao calcular total ano.");
+  
+  return response.json();
+  
 }
