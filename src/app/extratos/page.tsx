@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { fetchPeriodos } from "../services/mesService"
+import { fetchPeriodos, novoPeriodo } from "../services/mesService"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { calcularTotalAno, fetchExtratoId } from "../services/extratoService";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Extratos(){
 
@@ -13,6 +14,7 @@ export default function Extratos(){
     const [anos, setAnos] = useState<number[]>([]);
     const [anoSelecionado, setAnoSelecionado] = useState<string>(String(new Date().getFullYear()))
     const [totalSomada, setTotalSomado] = useState<TotalMes[]>([])
+    const [confirmacao, setConfirmacao] = useState(false)
 
 
     const bordas= "w-60 p-[15px] pb-[40px] !bg-[#12698A] rounded-xl transition duration-200 ease-in-out hover:-translate-y-3 hover:scale-110"
@@ -39,9 +41,7 @@ export default function Extratos(){
         }catch(erro){
             alert("Erro ao trazer periodos.")
         }
-    } 
-
-    
+    }
 
     async function handleTotal() {
         try{
@@ -52,6 +52,18 @@ export default function Extratos(){
             alert("Erro ao calcular totais.")
         }
         
+        
+    }
+
+    async function criarPeriodos() {
+        try{
+            await novoPeriodo();
+            const anoCriado = ((anos.at(-1) ?? 0)+ 1).toString();
+            setConfirmacao(false);
+            setAnoSelecionado(anoCriado)
+        }catch(erro){
+            console.log("Erro ao criar novo periodo.")
+        }
         
     }
 
@@ -81,9 +93,39 @@ export default function Extratos(){
                     <Button
                     variant="ghost"
                     className="bg-[#12698A] font-bold"
+                    onClick={() => setConfirmacao(true)}
                     >
                         Novo Periodo
                     </Button>
+                    {confirmacao && (
+                        <>
+                            <div className="fixed inset-0 bg-background opacity-50 z-50"></div>
+                            <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-60 p-4 w-[30%] max-w-xl shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="text-2xl font-bold">Deseja realmente abrir um novo periodo?</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    Serão criados mais 12 meses referente ao ano de <span className="font-bold">{(anos.at(-1) ?? 0)+ 1}</span>.
+                                </CardContent>
+                                <CardFooter className='gap-2'>
+                                    <Button
+                                    variant="ghost"
+                                    className="bg-[#12698A] font-bold"
+                                    onClick={criarPeriodos}
+                                    >
+                                        Sim
+                                    </Button>
+                                    <Button
+                                    variant="ghost"
+                                    className="bg-[#12698A] font-bold"
+                                    onClick={() => setConfirmacao(false)}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </>
+                    )}
                 </div>
             </div>
             <div className="w-full flex justify-center">

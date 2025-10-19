@@ -19,3 +19,14 @@ export async function fetchPeriodosId(id: number): Promise<Mes> {
     }
     return response.json();
 }
+
+export async function novoPeriodo() {
+    const response = await fetch(`${BASE_URL}/Criar-Periodos`,{
+        method: "POST"
+    });
+    if(!response.ok){
+        throw new Error("Falha ao criar periodo.")
+    }
+    return;
+    
+}

@@ -196,7 +196,7 @@ export default function ExtratosPage({
                 const categoriaMapeada = categorias.find(categoria => categoria.id === extrato.categoriaId);
                 const pessoaMapeada = pessoas.find(pessoa => pessoa.id === extrato.pessoaId);
                 const tipoMovimentoMapeado = tipoMovimento.find(tipoMovimento => tipoMovimento.id === extrato.tipoMovimentoId);
-
+                const valorMes = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(extrato.valorTotal)
                 return(
                 <TableRow key={extrato.id}>
                   <TableCell>
@@ -425,7 +425,7 @@ export default function ExtratosPage({
                   <TableCell>{pessoaMapeada?.nome}</TableCell>
                   <TableCell>{extrato.numeroParcela + "/" + extrato.numeroMaxParcelas}</TableCell>
                   <TableCell>{tipoMovimentoMapeado?.id === 1 ? <CircleArrowUp className='text-green-600'/> : <CircleArrowDownIcon className='text-red-600'/>}</TableCell>
-                  <TableCell className='text-right'>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(extrato.valorTotal)}</TableCell>
+                  <TableCell className='text-right'>{tipoMovimentoMapeado?.id === 1 ? valorMes : `-${valorMes}`}</TableCell>
                 </TableRow>
               )})}
             </TableBody>
